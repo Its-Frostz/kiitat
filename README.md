@@ -1,3 +1,39 @@
+# Attendance Web App
+
+This is a Next.js attendance web app with Supabase, Prisma, Google OAuth (college email only), QR code generation/scanning, location verification, and onboarding for year/section. Uses Tailwind CSS for UI. Prioritizes security and fool-proof attendance validation.
+
+## Features
+- Google login (college email only)
+- Teacher: generate QR codes for attendance
+- Student: scan QR codes to mark attendance
+- Location verification during attendance
+- Onboarding for year/section
+- Timetable integration (JSON format, to be added)
+
+## Setup
+1. Copy `.env.example` to `.env` and fill in your credentials.
+2. Install dependencies:
+   ```sh
+   npm install
+   ```
+3. Run the development server:
+   ```sh
+   npm run dev
+   ```
+
+## Tech Stack
+- Next.js (App Router, TypeScript)
+- Supabase (Auth, DB)
+- Prisma (ORM)
+- Tailwind CSS
+
+## Environment Variables
+See `.env.example` for required variables.
+
+---
+
+For more details, see `.github/copilot-instructions.md`.
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
