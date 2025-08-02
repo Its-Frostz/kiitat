@@ -19,6 +19,7 @@ export default function Dashboard() {
       if (data.user && (!data.user.user_metadata.role || (data.user.user_metadata.role === "STUDENT" && (!data.user.user_metadata.year || !data.user.user_metadata.section)))) {
         router.push("/onboarding");
       }
+      // console.log("User data:", data.user);
     };
     getUser();
   }, [router]);
@@ -115,7 +116,7 @@ function TeacherDashboard({ user }: { user: any }) {
   return (
     <div className="flex flex-col items-center gap-4">
       <h2 className="text-xl font-semibold">Teacher Panel</h2>
-      <p>Welcome, {user.email}</p>
+      <p>Welcome, {user.user_metadata.full_name}</p>
       <button className="bg-green-600 text-white px-4 py-2 rounded" onClick={generateQR} disabled={loading}>
         {loading ? 'Generating...' : 'Generate Attendance QR'}
       </button>
@@ -266,7 +267,7 @@ function StudentDashboard({ user }: { user: any }) {
   return (
     <div className="flex flex-col items-center gap-4">
       <h2 className="text-xl font-semibold">Student Panel</h2>
-      <p>Welcome, {user.email}</p>
+      <p>Welcome, {user.user_metadata.full_name}</p>
       <div className="w-64 h-64 bg-gray-100 rounded flex items-center justify-center">
         <Scanner
           onScan={(detectedCodes) => {
