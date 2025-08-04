@@ -1,18 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import FlowyCloth from "$/VaporWave";
-import NavBar from "$/Navbar";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+// import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -26,14 +13,146 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <div style={{ width: '100vw', height: '100vh', position: 'fixed', zIndex: "-99" }}>
+      <body>
+        {/* <div className="background">
           <FlowyCloth />
-        </div>
-        <NavBar />
-        {children}
+          <Silk
+            speed={5}
+            scale={1}
+            color="#2fab05"
+            noiseIntensity={1}
+            rotation={0}
+          />
+        </div> */}
+
+        <style>{`
+        
+        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
+        @import url('https://unpkg.com/normalize.css');
+
+        :root {
+          --font-size-min: 14;
+          --font-size-max: 20;
+          --font-ratio-min: 1.1;
+          --font-ratio-max: 1.33;
+          --font-width-min: 375;
+          --font-width-max: 1500;
+        }
+
+        h2,
+        li:last-of-type {
+          background: linear-gradient(
+            canvasText 50%,
+            color-mix(in oklch, canvas, canvasText 25%)
+          );
+          background-clip: text;
+          color: #0000;
+        }
+
+        header {
+          min-height: 100vh;
+          display: flex;
+          place-items: center;
+          width: 100%;
+          padding-inline: 5rem;
+        }
+
+        h1 {
+          --font-size-min: 24;
+          --font-level: 8;
+          text-wrap: pretty;
+          line-height: 0.98;
+          margin: 0;
+          background: linear-gradient(
+            170deg,
+            canvasText 5%,
+            color-mix(in oklch, canvas, canvasText 15%)
+          );
+          padding: 18px 0;
+          background-clip: text;
+          color: #0000;
+        }
+
+        html {
+          color-scheme: light dark;
+        }
+
+        // [data-theme='light'] {
+        //   color-scheme: light only;
+        // }
+
+        // [data-theme='dark'] {
+        //   color-scheme: dark only;
+        // }
+
+        .fluid {
+          --fluid-min: calc(
+            var(--font-size-min) * pow(var(--font-ratio-min), var(--font-level, 0))
+          );
+          --fluid-max: calc(
+            var(--font-size-max) * pow(var(--font-ratio-max), var(--font-level, 0))
+          );
+          --fluid-preferred: calc(
+            (var(--fluid-max) - var(--fluid-min)) /
+              (var(--font-width-max) - var(--font-width-min))
+          );
+          --fluid-type: clamp(
+            (var(--fluid-min) / 16) * 1rem,
+            ((var(--fluid-min) / 16) * 1rem) -
+              (((var(--fluid-preferred) * var(--font-width-min)) / 16) * 1rem) +
+              (var(--fluid-preferred) * var(--variable-unit, 100vi)),
+            (var(--fluid-max) / 16) * 1rem
+          );
+          font-size: var(--fluid-type);
+        }
+
+        *,
+        *:after,
+        *:before {
+          box-sizing: border-box;
+        }
+
+        body {
+          display: grid;
+          place-items: center;
+          background: light-dark(white, black);
+          min-height: 100vh;
+          font-family: 'Geist';
+          margin: 0;
+          padding: 0;
+        }
+
+        body::before {
+          --size: 45px;
+          --line: color-mix(in hsl, canvasText, transparent 70%);
+          content: '';
+          height: 100vh;
+          width: 100vw;
+          position: fixed;
+          background: linear-gradient(
+                90deg,
+                var(--line) 1px,
+                transparent 1px var(--size)
+              )
+              50% 50% / var(--size) var(--size),
+            linear-gradient(var(--line) 1px, transparent 1px var(--size)) 50% 50% /
+              var(--size) var(--size);
+          mask: linear-gradient(-20deg, transparent 50%, white);
+          top: 0;
+          transform-style: flat;
+          pointer-events: none;
+          z-index: -1;
+        }
+      `}</style>
+
+        <header>
+          <h1 className="fluid">
+            you can
+            <br />
+            do Anything.
+          </h1>
+        </header>
+        {/* {children} */}
       </body>
     </html>
   );
