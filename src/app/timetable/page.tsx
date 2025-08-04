@@ -3,7 +3,7 @@ import { useState } from "react";
 
 export default function TimetablePage() {
   const [json, setJson] = useState("");
-  const [timetable, setTimetable] = useState<any>(null);
+  const [timetable, setTimetable] = useState<Record<string, unknown> | null>(null);
   const [error, setError] = useState("");
   const [year, setYear] = useState("");
   const [section, setSection] = useState("");

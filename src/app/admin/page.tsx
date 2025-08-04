@@ -1,6 +1,29 @@
 "use client";
 import { useEffect, useState } from "react";
 
+interface User {
+  email: string;
+  role: string;
+  year?: number;
+  section?: string;
+}
+
+interface Timetable {
+  year: number;
+  section: string;
+  data: Record<string, unknown>;
+}
+
+interface AnalyticsStats {
+  totalUsers: number;
+  totalAttendance: number;
+  bySection: Array<{
+    year: number;
+    section: string;
+    count: number;
+  }>;
+}
+
 export default function AdminPage() {
   const [tab, setTab] = useState<'users' | 'timetable' | 'analytics'>('users');
 
@@ -20,7 +43,7 @@ export default function AdminPage() {
 }
 
 function UsersTab() {
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [role, setRole] = useState("");
   const [year, setYear] = useState("");
   const [section, setSection] = useState("");
@@ -74,7 +97,7 @@ function UsersTab() {
 }
 
 function TimetableTab() {
-  const [timetables, setTimetables] = useState<any[]>([]);
+  const [timetables, setTimetables] = useState<Timetable[]>([]);
   const [editing, setEditing] = useState<{ year: number, section: string } | null>(null);
   const [editJson, setEditJson] = useState("");
   const [error, setError] = useState("");
@@ -87,7 +110,7 @@ function TimetableTab() {
   };
   useEffect(fetchTimetables, []);
 
-  const handleEdit = (tt: any) => {
+  const handleEdit = (tt: Timetable) => {
     setEditing({ year: tt.year, section: tt.section });
     setEditJson(JSON.stringify(tt.data, null, 2));
     setError("");
@@ -168,7 +191,7 @@ function TimetableTab() {
 }
 
 function AnalyticsTab() {
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<AnalyticsStats | null>(null);
   useEffect(() => {
     fetch('/api/analytics')
       .then(res => res.json())
@@ -205,7 +228,7 @@ function AnalyticsTab() {
               </thead>
               <tbody>
                 {stats.bySection.length === 0 && <tr><td colSpan={3} className="p-2 text-gray-500">No data</td></tr>}
-                {stats.bySection.map((row: any, i: number) => (
+                {stats.bySection.map((row, i: number) => (
                   <tr key={i}>
                     <td className="p-2">{row.year}</td>
                     <td className="p-2">{row.section}</td>

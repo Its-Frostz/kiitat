@@ -10,9 +10,9 @@ export async function GET(req: NextRequest) {
       where: { qrSessionId: sessionId },
       include: { user: true },
     });
-    const students = (attendance as any[]).map((a) => a.user);
+    const students = attendance.map(a => ({ user: a.user }));
     return NextResponse.json({ students });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ students: [] });
   }
 }

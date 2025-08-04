@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { supabase } from '@/lib/supabaseClient';
 
 export async function POST(req: NextRequest) {
   try {
@@ -9,7 +8,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
     }
     // Validate QR payload
-    const { teacherId, year, section, latitude: qrLat, longitude: qrLng, timestamp } = qrPayload;
+    const { year, section, latitude: qrLat, longitude: qrLng, timestamp } = qrPayload;
     // Check QR code is not expired (5 min window)
     if (Date.now() - timestamp > 5 * 60 * 1000) {
       return NextResponse.json({ error: 'QR code expired' }, { status: 400 });
@@ -44,7 +43,7 @@ export async function POST(req: NextRequest) {
       },
     });
     return NextResponse.json({ success: true });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
@@ -78,19 +77,16 @@ export async function GET(req: NextRequest) {
     }
     if (teacherId) {
       // Teacher: return all sessions they created (grouped by session)
-      const sessions = await prisma.attendance.findMany({
+      const sessions = await prisma.attendance.groupBy({
+        by: ['qrSessionId', 'timestamp'],
         where: { qrSession: { teacherId } },
-        select: {
-          qrSessionId: true,
-          _count: { select: { id: true } },
-          timestamp: true,
-        },
+        _count: { id: true },
         orderBy: { timestamp: 'desc' },
       });
       return NextResponse.json({ attendance: sessions });
     }
     return NextResponse.json({ attendance: [] });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }

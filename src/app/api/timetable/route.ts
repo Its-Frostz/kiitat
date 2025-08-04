@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
       create: { year, section, data: timetable },
     });
     return NextResponse.json({ success: true, result });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
   try {
     const timetable = await prisma.timetable.findUnique({ where: { year_section: { year, section } } });
     return NextResponse.json({ timetable });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
@@ -43,7 +43,7 @@ export async function DELETE(req: NextRequest) {
   try {
     await prisma.timetable.delete({ where: { year_section: { year, section } } });
     return NextResponse.json({ success: true });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }

@@ -86,10 +86,10 @@ type Props = {
 };
 
 export default function VaporWave({
-  hueShift = 0,
+  hueShift = 102,
   noiseIntensity = 0,
   scanlineIntensity = 0,
-  speed = 0.5,
+  speed = 2,
   scanlineFrequency = 0,
   warpAmount = 0,
   resolutionScale = 1,

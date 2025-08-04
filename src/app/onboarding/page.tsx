@@ -23,7 +23,7 @@ export default function Onboarding() {
       return;
     }
     // Save onboarding info to user metadata
-    const updates: any = { role };
+    const updates: { role: string; year?: string; section?: string } = { role };
     if (role === "STUDENT") {
       updates.year = year;
       updates.section = section;

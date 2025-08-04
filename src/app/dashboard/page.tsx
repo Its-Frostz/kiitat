@@ -4,9 +4,36 @@ import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 import { QRCodeCanvas } from 'qrcode.react';
 import { Scanner } from '@yudiel/react-qr-scanner';
+import type { User } from "@supabase/supabase-js";
+
+interface Session {
+  id: string;
+  createdAt: string;
+  attendanceCount: number;
+  year: number;
+  section: string;
+}
+
+interface Student {
+  user: {
+    email: string;
+    name: string;
+    year: number;
+    section: string;
+  };
+  email?: string;
+  year?: number;
+  section?: string;
+}
+
+interface AttendanceRecord {
+  qrSessionId: string;
+  timestamp?: string;
+  createdAt?: string;
+}
 
 export default function Dashboard() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -37,15 +64,15 @@ export default function Dashboard() {
   );
 }
 
-function TeacherDashboard({ user }: { user: any }) {
+function TeacherDashboard({ user }: { user: User }) {
   const [qrValue, setQrValue] = useState('');
   const [info, setInfo] = useState('');
   const [loading, setLoading] = useState(false);
-  const [history, setHistory] = useState<any[]>([]);
-  const [timetable, setTimetable] = useState<any>(null);
-  const [sessions, setSessions] = useState<any[]>([]);
-  const [selectedSession, setSelectedSession] = useState<any>(null);
-  const [students, setStudents] = useState<any[]>([]);
+  const [history, setHistory] = useState<AttendanceRecord[]>([]);
+  const [timetable, setTimetable] = useState<Record<string, unknown> | null>(null);
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
+  const [students, setStudents] = useState<Student[]>([]);
 
   useEffect(() => {
     fetch(`/api/attendance?teacherId=${user.id}`)
@@ -95,14 +122,14 @@ function TeacherDashboard({ user }: { user: any }) {
     });
   };
 
-  const handleSessionClick = (session: any) => {
+  const handleSessionClick = (session: Session) => {
     setSelectedSession(session);
     fetch(`/api/teacher/session-students?sessionId=${session.id}`)
       .then(res => res.json())
       .then(data => setStudents(data.students || []));
   };
 
-  const handleExport = async (session: any) => {
+  const handleExport = async (session: Session) => {
     const res = await fetch(`/api/teacher/session-export?sessionId=${session.id}`);
     const blob = await res.blob();
     const url = window.URL.createObjectURL(blob);
@@ -165,12 +192,12 @@ function TeacherDashboard({ user }: { user: any }) {
   );
 }
 
-function StudentDashboard({ user }: { user: any }) {
+function StudentDashboard({ user }: { user: User }) {
   const [scanResult, setScanResult] = useState('');
   const [info, setInfo] = useState('');
   const [location, setLocation] = useState<{lat: number, lng: number} | null>(null);
-  const [history, setHistory] = useState<any[]>([]);
-  const [timetable, setTimetable] = useState<any>(null);
+  const [history, setHistory] = useState<AttendanceRecord[]>([]);
+  const [timetable, setTimetable] = useState<Record<string, unknown> | null>(null);
   const [summary, setSummary] = useState<{ total: number, present: number, percentage: number } | null>(null);
 
   useEffect(() => {
@@ -287,7 +314,7 @@ function StudentDashboard({ user }: { user: any }) {
           {history.length === 0 && <li className="p-2 text-gray-500">No attendance yet.</li>}
           {history.map((a, i) => (
             <li key={i} className="p-2 text-sm">
-              Session: {a.qrSessionId} | Date: {new Date(a.timestamp || a.createdAt).toLocaleString()}
+              Session: {a.qrSessionId} | Date: {new Date(a.timestamp || a.createdAt || Date.now()).toLocaleString()}
             </li>
           ))}
         </ul>

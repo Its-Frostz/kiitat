@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(_req: NextRequest) {
+export async function GET() {
   try {
     const records = await prisma.attendance.findMany({
       include: {
@@ -11,7 +11,7 @@ export async function GET(_req: NextRequest) {
       orderBy: { timestamp: 'desc' },
     });
     const header = 'Email,Role,Year,Section,Session,Date,Latitude,Longitude\n';
-    const rows = (records as any[]).map((r) => [
+    const rows = records.map((r) => [
       r.user.email,
       r.user.role,
       r.user.year || '',
@@ -28,7 +28,7 @@ export async function GET(_req: NextRequest) {
         'Content-Disposition': 'attachment; filename="attendance.csv"',
       },
     });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }

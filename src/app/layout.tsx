@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import FlowyCloth from "@/components/VaporWave";
+import FlowyCloth from "$/VaporWave";
+import NavBar from "$/Navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,6 +32,7 @@ export default function RootLayout({
         <div style={{ width: '100vw', height: '100vh', position: 'fixed', zIndex: "-99" }}>
           <FlowyCloth />
         </div>
+        <NavBar />
         {children}
       </body>
     </html>

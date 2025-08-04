@@ -6,19 +6,19 @@ export async function GET(req: NextRequest) {
   const teacherId = searchParams.get('teacherId');
   if (!teacherId) return NextResponse.json({ sessions: [] });
   try {
-    const sessions = await prisma.qrSession.findMany({
+    const sessions = await prisma.qRSession.findMany({
       where: { teacherId },
       orderBy: { createdAt: 'desc' },
       include: {
         attendances: true,
       },
     });
-    const result = (sessions as any[]).map((s) => ({
+    const result = sessions.map(s => ({
       ...s,
       attendanceCount: s.attendances.length,
     }));
     return NextResponse.json({ sessions: result });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ sessions: [] });
   }
 }

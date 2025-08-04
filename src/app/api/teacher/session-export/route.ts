@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
       orderBy: { timestamp: 'asc' },
     });
     const header = 'Email,Year,Section,Date,Latitude,Longitude\n';
-    const rows = (attendance as any[]).map(a => [
+    const rows = attendance.map(a => [
       a.user.email,
       a.user.year || '',
       a.user.section || '',
@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
         'Content-Disposition': `attachment; filename="attendance-session-${sessionId}.csv"`,
       },
     });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }

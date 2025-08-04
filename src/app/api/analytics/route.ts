@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(_req: NextRequest) {
+export async function GET() {
   try {
     const totalUsers = await prisma.user.count();
     const totalAttendance = await prisma.attendance.count();
@@ -29,7 +29,7 @@ export async function GET(_req: NextRequest) {
       totalAttendance,
       bySection: Object.values(sectionStats),
     });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }

@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
   if (!userId || !year || !section) return NextResponse.json({ error: 'Missing params' }, { status: 400 });
   try {
     // Get all QR sessions for this year/section
-    const sessions = await prisma.qrSession.findMany({ where: { year, section } });
+    const sessions = await prisma.qRSession.findMany({ where: { year, section } });
     const total = sessions.length;
     // Get all attendance records for this user in these sessions
     const sessionIds = (sessions as { id: string }[]).map((s) => s.id);
@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
     });
     const percentage = total === 0 ? 0 : (present / total) * 100;
     return NextResponse.json({ summary: { total, present, percentage } });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
