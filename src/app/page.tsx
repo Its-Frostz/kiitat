@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
+import Headertext from "@/components/Headertext";
 
 export default function Home() {
   const [, setUser] = useState<User | null>(null);
@@ -14,14 +15,14 @@ export default function Home() {
       const { data } = await supabase.auth.getUser();
       setUser(data.user);
       if (data.user) {
-        router.push("/dashboard");
+        // router.push("/dashboard");
       }
     };
     getUser();
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        router.push("/dashboard");
+        // router.push("/dashboard");
       }
     });
     return () => {
@@ -50,18 +51,7 @@ export default function Home() {
       <h1 className="text-3xl font-bold">Attendance Web App</h1>
     </div> */}
 
-    <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
-        @import url('https://unpkg.com/normalize.css');
-
-        :root {
-          --font-size-min: 14;
-          --font-size-max: 20;
-          --font-ratio-min: 1.1;
-          --font-ratio-max: 1.33;
-          --font-width-min: 375;
-          --font-width-max: 1500;
-        }
+    {/* <style>{`
 
         h2,
         li:last-of-type {
@@ -118,14 +108,10 @@ export default function Home() {
           font-size: var(--fluid-type);
         }
 
-        *,
-        *:after,
-        *:before {
-          box-sizing: border-box;
-        }`}</style>
+        `}</style> */}
     
-    <header>
-      <h1 className="fluid">
+    {/* <header>
+      <h1 className="fluid font-bold">
         you can
         <br />
         do Anything.
@@ -134,7 +120,16 @@ export default function Home() {
         Sign in with Google
       </button>
       {error && <div className="text-red-600">{error}</div>}
-    </header>
+    </header> */}
+    <Headertext title={[
+      "you can",
+      "do Anything.",
+    ]}>
+      <button className="px-4 py-2 bg-blue-600 text-white rounded" onClick={signInWithGoogle}>
+        Sign in with Google
+      </button>
+      {error && <div className="text-red-600">{error}</div>}
+    </Headertext>
   </>
   );
 }

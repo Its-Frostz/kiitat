@@ -1,0 +1,40 @@
+/* @import 'tailwindcss'; */
+h2,
+li:last-of-type {
+    background: linear-gradient(canvasText 50%,
+            color-mix(in oklch, canvas, canvasText 25%));
+    background-clip: text;
+    color: #0000;
+}
+
+header {
+    min-height: 100vh;
+    display: flex;
+    place-items: center;
+    width: 100%;
+    padding-inline: 5rem;
+}
+
+h1 {
+    --font-size-min: 24;
+    --font-level: 8;
+    text-wrap: pretty;
+    line-height: 0.98;
+    margin: 0;
+    background: linear-gradient(170deg,
+            canvasText 5%,
+            color-mix(in oklch, canvas, canvasText 15%));
+    padding: 18px 0;
+    background-clip: text;
+    color: #0000;
+}
+
+.fluid {
+    --fluid-min: calc(var(--font-size-min) * pow(var(--font-ratio-min), var(--font-level, 0)));
+    --fluid-max: calc(var(--font-size-max) * pow(var(--font-ratio-max), var(--font-level, 0)));
+    --fluid-preferred: calc((var(--fluid-max) - var(--fluid-min)) / (var(--font-width-max) - var(--font-width-min)));
+    --fluid-type: clamp((var(--fluid-min) / 16) * 1rem,
+            ((var(--fluid-min) / 16) * 1rem) - (((var(--fluid-preferred) * var(--font-width-min)) / 16) * 1rem) + (var(--fluid-preferred) * var(--variable-unit, 100vi)),
+            (var(--fluid-max) / 16) * 1rem);
+    font-size: var(--fluid-type);
+}
