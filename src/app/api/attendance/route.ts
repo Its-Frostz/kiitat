@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Check user exists and matches year/section
-    let user = await prisma.user.findUnique({ where: { id: userId } });
+    const user = await prisma.user.findUnique({ where: { id: userId } });
     
     if (!user) {
       return NextResponse.json({ error: 'User not found in database. Please complete onboarding first.' }, { status: 400 });

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabaseClient';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(req: NextRequest) {

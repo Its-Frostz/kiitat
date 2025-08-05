@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Ensure teacher exists in database
-    let teacher = await prisma.user.findUnique({
+    const teacher = await prisma.user.findUnique({
       where: { id: teacherId }
     });
 
