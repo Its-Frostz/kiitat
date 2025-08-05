@@ -70,7 +70,7 @@ export default function Dashboard() {
       // Auto-sync user to database if they have completed onboarding
       if (data.user && data.user.user_metadata.role) {
         try {
-          await fetch('/api/users/sync', {
+          const syncResponse = await fetch('/api/users/sync', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -82,9 +82,14 @@ export default function Dashboard() {
               section: data.user.user_metadata.section,
             }),
           });
+          
+          const syncResult = await syncResponse.json();
+          if (!syncResult.success) {
+            console.warn('User sync failed:', syncResult.error);
+          }
         } catch (error) {
           console.error('Auto-sync failed:', error);
-          // Continue anyway
+          // Continue anyway - we'll handle gracefully in APIs
         }
       }
     };
@@ -165,7 +170,9 @@ function TeacherDashboard({ user }: { user: User }) {
         const result = await response.json();
         
         if (result.success) {
-          setQrValue(JSON.stringify(result.qrPayload));
+          // Create a proper attendance URL that can be scanned
+          const attendanceUrl = `${window.location.origin}/attendance?session=${result.sessionId}&data=${encodeURIComponent(JSON.stringify(result.qrPayload))}`;
+          setQrValue(attendanceUrl);
           setInfo('QR code generated successfully! Valid for 5 minutes.');
           
           // Refresh sessions list
@@ -326,6 +333,14 @@ function StudentDashboard({ user }: { user: User }) {
     setInfo('Processing QR code...');
     
     try {
+      // Check if it's a URL (new format)
+      if (data.startsWith('http')) {
+        // Redirect to attendance page
+        window.location.href = data;
+        return;
+      }
+
+      // Handle legacy JSON format
       const qr = JSON.parse(data);
       
       // Validate QR structure
