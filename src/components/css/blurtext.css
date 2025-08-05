@@ -1,0 +1,55 @@
+/* BlurText Component Styles */
+/* Inspired by header.css typography and fluid sizing */
+
+.blur-text-container {
+    --font-size-min: 24;
+    --font-level: 8;
+    text-wrap: pretty;
+    line-height: 0.98;
+    margin: 0;
+    padding: 18px 0;
+    font-weight: bold;
+}
+
+.blur-text-fluid {
+    --fluid-min: calc(var(--font-size-min) * pow(var(--font-ratio-min), var(--font-level, 0)));
+    --fluid-max: calc(var(--font-size-max) * pow(var(--font-ratio-max), var(--font-level, 0)));
+    --fluid-preferred: calc((var(--fluid-max) - var(--fluid-min)) / (var(--font-width-max) - var(--font-width-min)));
+    --fluid-type: clamp((var(--fluid-min) / 16) * 1rem,
+            ((var(--fluid-min) / 16) * 1rem) - (((var(--fluid-preferred) * var(--font-width-min)) / 16) * 1rem) + (var(--fluid-preferred) * var(--variable-unit, 100vi)),
+            (var(--fluid-max) / 16) * 1rem);
+    font-size: var(--fluid-type);
+}
+
+.blur-text-gradient {
+    background: linear-gradient(170deg,
+            canvasText 5%,
+            color-mix(in oklch, canvas, canvasText 15%));
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+/* Ensure spans inherit the gradient properly */
+.blur-text-gradient span {
+    background: inherit;
+    background-clip: inherit;
+    -webkit-background-clip: inherit;
+    color: inherit;
+}
+
+/* Additional styling for better visual hierarchy */
+.blur-text-hero {
+    --font-size-min: 32;
+    --font-level: 10;
+}
+
+.blur-text-large {
+    --font-size-min: 28;
+    --font-level: 9;
+}
+
+.blur-text-medium {
+    --font-size-min: 20;
+    --font-level: 6;
+}

@@ -3,26 +3,33 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
-import Headertext from "@/components/Headertext";
+import Headertext from "@/components/ui/Headertext";
+import { Button } from "@/components/ui/button";
+import { IconBrandGoogle } from '@tabler/icons-react';
+import { IconMail } from '@tabler/icons-react';
+import ShinyText from "@/components/ShinyText";
+// import LoadingAnimation from "@/components/ui/Loading";
+import useIsMobile from "@/util";
 
 export default function Home() {
   const [, setUser] = useState<User | null>(null);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const getUser = async () => {
       const { data } = await supabase.auth.getUser();
       setUser(data.user);
       if (data.user) {
-        // router.push("/dashboard");
+        router.push("/dashboard");
       }
     };
     getUser();
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        // router.push("/dashboard");
+        router.push("/dashboard");
       }
     });
     return () => {
@@ -44,92 +51,27 @@ export default function Home() {
     });
     if (error) setError(error.message);
   };
+  const signInWithEmail = async () => {
+    alert("Email Implementation is under progress");
+  };
 
   return (
     <>
-    {/* <div className="flex flex-col items-center justify-center min-h-screen gap-8">
-      <h1 className="text-3xl font-bold">Attendance Web App</h1>
-    </div> */}
+      <Headertext title={
+        isMobile ? "KIITAT say   No to Proxies" : "KIITAT say       No to Proxies"
+      }>
+        <div className="flex gap-4 ml-0 md:ml-3">
+          <Button variant="outline" size="lg" onClick={signInWithGoogle}>
+            <IconBrandGoogle stroke={1.25} /><ShinyText text="Google" />
+          </Button>
+          <Button variant="outline" size="lg" onClick={signInWithEmail}>
+            <IconMail stroke={1.25} /><ShinyText text="Email" />
+          </Button>
+          {error && <div className="text-red-600">{error}</div>}
+        </div>
 
-    {/* <style>{`
-
-        h2,
-        li:last-of-type {
-          background: linear-gradient(
-            canvasText 50%,
-            color-mix(in oklch, canvas, canvasText 25%)
-          );
-          background-clip: text;
-          color: #0000;
-        }
-
-        header {
-          min-height: 100vh;
-          display: flex;
-          place-items: center;
-          width: 100%;
-          padding-inline: 5rem;
-        }
-
-        h1 {
-          --font-size-min: 24;
-          --font-level: 8;
-          text-wrap: pretty;
-          line-height: 0.98;
-          margin: 0;
-          background: linear-gradient(
-            170deg,
-            canvasText 5%,
-            color-mix(in oklch, canvas, canvasText 15%)
-          );
-          padding: 18px 0;
-          background-clip: text;
-          color: #0000;
-        }
-
-        .fluid {
-          --fluid-min: calc(
-            var(--font-size-min) * pow(var(--font-ratio-min), var(--font-level, 0))
-          );
-          --fluid-max: calc(
-            var(--font-size-max) * pow(var(--font-ratio-max), var(--font-level, 0))
-          );
-          --fluid-preferred: calc(
-            (var(--fluid-max) - var(--fluid-min)) /
-              (var(--font-width-max) - var(--font-width-min))
-          );
-          --fluid-type: clamp(
-            (var(--fluid-min) / 16) * 1rem,
-            ((var(--fluid-min) / 16) * 1rem) -
-              (((var(--fluid-preferred) * var(--font-width-min)) / 16) * 1rem) +
-              (var(--fluid-preferred) * var(--variable-unit, 100vi)),
-            (var(--fluid-max) / 16) * 1rem
-          );
-          font-size: var(--fluid-type);
-        }
-
-        `}</style> */}
-    
-    {/* <header>
-      <h1 className="fluid font-bold">
-        you can
-        <br />
-        do Anything.
-      </h1>
-      <button className="px-4 py-2 bg-blue-600 text-white rounded" onClick={signInWithGoogle}>
-        Sign in with Google
-      </button>
-      {error && <div className="text-red-600">{error}</div>}
-    </header> */}
-    <Headertext title={[
-      "you can",
-      "do Anything.",
-    ]}>
-      <button className="px-4 py-2 bg-blue-600 text-white rounded" onClick={signInWithGoogle}>
-        Sign in with Google
-      </button>
-      {error && <div className="text-red-600">{error}</div>}
-    </Headertext>
-  </>
+      </Headertext>
+      {/* <LoadingAnimation /> */}
+    </>
   );
 }

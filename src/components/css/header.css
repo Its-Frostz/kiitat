@@ -7,13 +7,6 @@ li:last-of-type {
     color: #0000;
 }
 
-header {
-    min-height: 100vh;
-    display: flex;
-    place-items: center;
-    width: 100%;
-    padding-inline: 5rem;
-}
 
 h1 {
     --font-size-min: 24;
