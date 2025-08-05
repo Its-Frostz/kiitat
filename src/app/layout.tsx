@@ -27,90 +27,6 @@ export default function RootLayout({
 
         <style>{`
         
-        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
-        @import url('https://unpkg.com/normalize.css');
-
-        :root {
-          --font-size-min: 14;
-          --font-size-max: 20;
-          --font-ratio-min: 1.1;
-          --font-ratio-max: 1.33;
-          --font-width-min: 375;
-          --font-width-max: 1500;
-        }
-
-        h2,
-        li:last-of-type {
-          background: linear-gradient(
-            canvasText 50%,
-            color-mix(in oklch, canvas, canvasText 25%)
-          );
-          background-clip: text;
-          color: #0000;
-        }
-
-        header {
-          min-height: 100vh;
-          display: flex;
-          place-items: center;
-          width: 100%;
-          padding-inline: 5rem;
-        }
-
-        h1 {
-          --font-size-min: 24;
-          --font-level: 8;
-          text-wrap: pretty;
-          line-height: 0.98;
-          margin: 0;
-          background: linear-gradient(
-            170deg,
-            canvasText 5%,
-            color-mix(in oklch, canvas, canvasText 15%)
-          );
-          padding: 18px 0;
-          background-clip: text;
-          color: #0000;
-        }
-
-        html {
-          color-scheme: light dark;
-        }
-
-        // [data-theme='light'] {
-        //   color-scheme: light only;
-        // }
-
-        // [data-theme='dark'] {
-        //   color-scheme: dark only;
-        // }
-
-        .fluid {
-          --fluid-min: calc(
-            var(--font-size-min) * pow(var(--font-ratio-min), var(--font-level, 0))
-          );
-          --fluid-max: calc(
-            var(--font-size-max) * pow(var(--font-ratio-max), var(--font-level, 0))
-          );
-          --fluid-preferred: calc(
-            (var(--fluid-max) - var(--fluid-min)) /
-              (var(--font-width-max) - var(--font-width-min))
-          );
-          --fluid-type: clamp(
-            (var(--fluid-min) / 16) * 1rem,
-            ((var(--fluid-min) / 16) * 1rem) -
-              (((var(--fluid-preferred) * var(--font-width-min)) / 16) * 1rem) +
-              (var(--fluid-preferred) * var(--variable-unit, 100vi)),
-            (var(--fluid-max) / 16) * 1rem
-          );
-          font-size: var(--fluid-type);
-        }
-
-        *,
-        *:after,
-        *:before {
-          box-sizing: border-box;
-        }
 
         body {
           display: grid;
@@ -143,16 +59,21 @@ export default function RootLayout({
           pointer-events: none;
           z-index: -1;
         }
+
+        html {
+          color-scheme: light dark;
+        }
+
+        // [data-theme='light'] {
+        //   color-scheme: light only;
+        // }
+
+        // [data-theme='dark'] {
+        //   color-scheme: dark only;
+        // }
       `}</style>
 
-        <header>
-          <h1 className="fluid">
-            you can
-            <br />
-            do Anything.
-          </h1>
-        </header>
-        {/* {children} */}
+        {children}
       </body>
     </html>
   );
