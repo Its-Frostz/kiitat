@@ -9,21 +9,39 @@ import type { User } from "@supabase/supabase-js";
 interface Session {
   id: string;
   createdAt: string;
-  attendanceCount: number;
   year: number;
   section: string;
+  teacherId: string;
+  latitude: number;
+  longitude: number;
+  validFrom: string;
+  validTo: string;
+  attendances?: {
+    id: string;
+    userId: string;
+    timestamp: string;
+    latitude: number;
+    longitude: number;
+    user: {
+      id: string;
+      email: string;
+      name: string;
+    };
+  }[];
 }
 
 interface Student {
   user: {
+    id: string;
     email: string;
     name: string;
-    year: number;
-    section: string;
+    year?: number;
+    section?: string;
   };
   email?: string;
   year?: number;
   section?: string;
+  timestamp?: string;
 }
 
 interface AttendanceRecord {
@@ -89,7 +107,7 @@ function TeacherDashboard({ user }: { user: User }) {
   }, [user.user_metadata.year, user.user_metadata.section]);
 
   useEffect(() => {
-    fetch(`/api/teacher/sessions?teacherId=${user.id}`)
+    fetch(`/api/qr-session?teacherId=${user.id}`)
       .then(res => res.json())
       .then(data => setSessions(data.sessions || []));
   }, [user.id]);
@@ -97,26 +115,52 @@ function TeacherDashboard({ user }: { user: User }) {
   const generateQR = async () => {
     setLoading(true);
     setInfo('');
+    
     // Get teacher location
     if (!navigator.geolocation) {
       setInfo('Geolocation not supported');
       setLoading(false);
       return;
     }
+
     navigator.geolocation.getCurrentPosition(async (pos) => {
       const { latitude, longitude } = pos.coords;
-      // Generate QR payload (could be a session ID, but for demo, use JSON)
-      const payload = {
-        teacherId: user.id,
-        year: user.user_metadata.year,
-        section: user.user_metadata.section,
-        latitude,
-        longitude,
-        timestamp: Date.now(),
-      };
-      setQrValue(JSON.stringify(payload));
+      
+      try {
+        // Create QR session via API
+        const response = await fetch('/api/qr-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            teacherId: user.id,
+            year: user.user_metadata.year,
+            section: user.user_metadata.section,
+            latitude,
+            longitude,
+          }),
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          setQrValue(JSON.stringify(result.qrPayload));
+          setInfo('QR code generated successfully! Valid for 5 minutes.');
+          
+          // Refresh sessions list
+          fetch(`/api/qr-session?teacherId=${user.id}`)
+            .then(res => res.json())
+            .then(data => setSessions(data.sessions || []));
+        } else {
+          setInfo(result.error || 'Failed to generate QR code');
+        }
+      } catch (error) {
+        console.error('QR generation error:', error);
+        setInfo('Failed to generate QR code');
+      }
+      
       setLoading(false);
-    }, () => {
+    }, (error) => {
+      console.error('Location error:', error);
       setInfo('Location permission denied');
       setLoading(false);
     });
@@ -124,20 +168,37 @@ function TeacherDashboard({ user }: { user: User }) {
 
   const handleSessionClick = (session: Session) => {
     setSelectedSession(session);
-    fetch(`/api/teacher/session-students?sessionId=${session.id}`)
-      .then(res => res.json())
-      .then(data => setStudents(data.students || []));
+    // Students are already included in the session data
+    const attendeesData = session.attendances?.map(att => ({
+      user: att.user,
+      email: att.user.email,
+      timestamp: att.timestamp,
+    })) || [];
+    setStudents(attendeesData);
   };
 
   const handleExport = async (session: Session) => {
-    const res = await fetch(`/api/teacher/session-export?sessionId=${session.id}`);
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `attendance-session-${session.id}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
+    try {
+      // Create CSV data from session attendances
+      const attendances = session.attendances || [];
+      const csvHeader = 'Email,Name,Timestamp,Latitude,Longitude\n';
+      const csvRows = attendances.map(att => 
+        `${att.user.email},${att.user.name},${att.timestamp},${att.latitude},${att.longitude}`
+      ).join('\n');
+      const csvContent = csvHeader + csvRows;
+      
+      // Download CSV
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `attendance-session-${session.id.slice(0, 8)}.csv`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Export error:', error);
+      setInfo('Failed to export attendance data');
+    }
   };
 
   return (
@@ -159,9 +220,9 @@ function TeacherDashboard({ user }: { user: User }) {
         <ul className="bg-white rounded shadow divide-y">
           {sessions.length === 0 && <li className="p-2 text-gray-500">No sessions yet.</li>}
           {sessions.map((s, i) => (
-            <li key={i} className="p-2 text-sm flex justify-between items-center">
+            <li key={s.id || i} className="p-2 text-sm flex justify-between items-center">
               <span>
-                {new Date(s.createdAt).toLocaleString()} | Year {s.year} Section {s.section} | {s.attendanceCount} present
+                {new Date(s.createdAt).toLocaleString()} | Year {s.year} Section {s.section} | {s.attendances?.length || 0} present
               </span>
               <span className="flex gap-2">
                 <button className="bg-blue-600 text-white px-2 py-1 rounded" onClick={()=>handleSessionClick(s)}>View</button>
@@ -177,7 +238,10 @@ function TeacherDashboard({ user }: { user: User }) {
           <ul className="bg-gray-50 rounded p-2 text-xs">
             {students.length === 0 && <li className="text-gray-500">No students present.</li>}
             {students.map((stu, i) => (
-              <li key={i}>{stu.email} ({stu.year}-{stu.section})</li>
+              <li key={i} className="py-1">
+                {stu.user.email} - {stu.user.name}
+                {stu.timestamp && <span className="text-gray-500 ml-2">({new Date(stu.timestamp).toLocaleTimeString()})</span>}
+              </li>
             ))}
           </ul>
         </div>
@@ -235,27 +299,46 @@ function StudentDashboard({ user }: { user: User }) {
 
   const handleScan = async (data: string | null) => {
     if (!data) return;
+    
     setScanResult(data);
-    setInfo('');
+    setInfo('Processing QR code...');
+    
     try {
       const qr = JSON.parse(data);
+      
+      // Validate QR structure
+      if (!qr.sessionId || !qr.year || !qr.section) {
+        setInfo('Invalid QR code format.');
+        return;
+      }
+      
       // Validate year/section
       if (qr.year !== user.user_metadata.year || qr.section !== user.user_metadata.section) {
         setInfo('This QR is not for your section/year.');
         return;
       }
-      // Validate location (within 50 meters)
-      if (location) {
-        const dist = getDistanceFromLatLonInMeters(location.lat, location.lng, qr.latitude, qr.longitude);
-        if (dist > 50) {
-          setInfo('You are not in the correct location for attendance.');
-          return;
-        }
-      } else {
-        setInfo('Location not available.');
+      
+      // Check if QR is expired
+      const now = Date.now();
+      if (qr.validTo && now > qr.validTo) {
+        setInfo('QR code has expired.');
         return;
       }
+      
+      // Validate location (within 50 meters)
+      if (!location) {
+        setInfo('Location not available. Please enable location services.');
+        return;
+      }
+      
+      const dist = getDistanceFromLatLonInMeters(location.lat, location.lng, qr.latitude, qr.longitude);
+      if (dist > 50) {
+        setInfo(`You are too far from the attendance location (${dist.toFixed(0)}m away). Please move closer.`);
+        return;
+      }
+      
       // Send attendance to backend
+      setInfo('Marking attendance...');
       const res = await fetch('/api/attendance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -266,14 +349,21 @@ function StudentDashboard({ user }: { user: User }) {
           longitude: location.lng,
         }),
       });
+      
       const result = await res.json();
+      
       if (result.success) {
-        setInfo('Attendance marked successfully!');
+        setInfo('✅ Attendance marked successfully!');
+        // Refresh attendance history
+        fetch(`/api/attendance?userId=${user.id}`)
+          .then(res => res.json())
+          .then(data => setHistory(data.attendance || []));
       } else {
-        setInfo(result.error || 'Attendance failed.');
+        setInfo(`❌ ${result.error || 'Attendance failed.'}`);
       }
-    } catch {
-      setInfo('Invalid QR code.');
+    } catch (error) {
+      console.error('QR scan error:', error);
+      setInfo('Invalid QR code format.');
     }
   };
 

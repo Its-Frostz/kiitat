@@ -4,46 +4,78 @@ import { prisma } from '@/lib/prisma';
 export async function POST(req: NextRequest) {
   try {
     const { userId, qrPayload, latitude, longitude } = await req.json();
-    if (!userId || !qrPayload || !latitude || !longitude) {
+    
+    if (!userId || !qrPayload || latitude === undefined || longitude === undefined) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
     }
-    // Validate QR payload
-    const { year, section, latitude: qrLat, longitude: qrLng, timestamp } = qrPayload;
-    // Check QR code is not expired (5 min window)
-    if (Date.now() - timestamp > 5 * 60 * 1000) {
+
+    // Validate QR payload structure
+    const { sessionId, year, section, latitude: qrLat, longitude: qrLng, validFrom, validTo } = qrPayload;
+    
+    if (!sessionId) {
+      return NextResponse.json({ error: 'Invalid QR code: missing session ID' }, { status: 400 });
+    }
+
+    // Check if QR session exists and is valid
+    const qrSession = await prisma.qRSession.findUnique({
+      where: { id: sessionId }
+    });
+
+    if (!qrSession) {
+      return NextResponse.json({ error: 'QR session not found' }, { status: 400 });
+    }
+
+    // Check QR code is not expired
+    const now = new Date();
+    if (now < qrSession.validFrom || now > qrSession.validTo) {
       return NextResponse.json({ error: 'QR code expired' }, { status: 400 });
     }
+
     // Check location (within 50 meters)
     const dist = getDistanceFromLatLonInMeters(latitude, longitude, qrLat, qrLng);
     if (dist > 50) {
-      return NextResponse.json({ error: 'Location mismatch' }, { status: 400 });
+      return NextResponse.json({ error: `Location mismatch: ${dist.toFixed(0)}m away` }, { status: 400 });
     }
+
     // Check user exists and matches year/section
     const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user || user.year !== year || user.section !== section) {
-      return NextResponse.json({ error: 'User not allowed for this QR' }, { status: 400 });
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 400 });
     }
-    // Check if already marked
-    const already = await prisma.attendance.findFirst({
+    
+    if (user.year !== year || user.section !== section) {
+      return NextResponse.json({ error: 'User not allowed for this QR (year/section mismatch)' }, { status: 400 });
+    }
+
+    // Check if already marked attendance for this session
+    const existingAttendance = await prisma.attendance.findFirst({
       where: {
         userId,
-        qrSessionId: timestamp.toString(), // Use timestamp as session ID for demo
+        qrSessionId: sessionId,
       },
     });
-    if (already) {
-      return NextResponse.json({ error: 'Attendance already marked' }, { status: 400 });
+
+    if (existingAttendance) {
+      return NextResponse.json({ error: 'Attendance already marked for this session' }, { status: 400 });
     }
+
     // Mark attendance
-    await prisma.attendance.create({
+    const attendance = await prisma.attendance.create({
       data: {
         userId,
-        qrSessionId: timestamp.toString(),
-        latitude,
-        longitude,
+        qrSessionId: sessionId,
+        latitude: parseFloat(latitude),
+        longitude: parseFloat(longitude),
       },
     });
-    return NextResponse.json({ success: true });
-  } catch {
+
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Attendance marked successfully!',
+      attendanceId: attendance.id 
+    });
+  } catch (error) {
+    console.error('Attendance marking error:', error);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
