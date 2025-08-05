@@ -60,11 +60,33 @@ export default function Dashboard() {
       const { data } = await supabase.auth.getUser();
       setUser(data.user);
       setLoading(false);
+      
       // If not onboarded, redirect to onboarding
       if (data.user && (!data.user.user_metadata.role || (data.user.user_metadata.role === "STUDENT" && (!data.user.user_metadata.year || !data.user.user_metadata.section)))) {
         router.push("/onboarding");
+        return;
       }
-      // console.log("User data:", data.user);
+
+      // Auto-sync user to database if they have completed onboarding
+      if (data.user && data.user.user_metadata.role) {
+        try {
+          await fetch('/api/users/sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: data.user.id,
+              email: data.user.email,
+              name: data.user.user_metadata.full_name || data.user.user_metadata.name || data.user.email?.split('@')[0],
+              role: data.user.user_metadata.role,
+              year: data.user.user_metadata.year,
+              section: data.user.user_metadata.section,
+            }),
+          });
+        } catch (error) {
+          console.error('Auto-sync failed:', error);
+          // Continue anyway
+        }
+      }
     };
     getUser();
   }, [router]);

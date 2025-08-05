@@ -23,7 +23,7 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
+  id        String   @id // Remove @default(uuid()) to allow custom IDs
   email     String   @unique
   name      String?
   role      Role

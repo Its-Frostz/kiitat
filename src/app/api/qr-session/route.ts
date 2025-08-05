@@ -9,6 +9,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
+    // Ensure teacher exists in database
+    let teacher = await prisma.user.findUnique({
+      where: { id: teacherId }
+    });
+
+    if (!teacher) {
+      // Try to get user info from the request and create the user
+      return NextResponse.json({ 
+        error: 'Teacher not found in database. Please complete onboarding first.' 
+      }, { status: 400 });
+    }
+
     // Create QR session with 5-minute validity
     const validFrom = new Date();
     const validTo = new Date(validFrom.getTime() + 5 * 60 * 1000); // 5 minutes from now

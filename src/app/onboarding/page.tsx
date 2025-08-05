@@ -22,17 +22,45 @@ export default function Onboarding() {
       setError("Not authenticated");
       return;
     }
+
     // Save onboarding info to user metadata
     const updates: { role: string; year?: string; section?: string } = { role };
     if (role === "STUDENT") {
       updates.year = year;
       updates.section = section;
     }
+    
     const { error: updateError } = await supabase.auth.updateUser({ data: updates });
     if (updateError) {
       setError(updateError.message);
       return;
     }
+
+    // Sync user to database
+    try {
+      const syncResponse = await fetch('/api/users/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          email: user.email,
+          name: user.user_metadata.full_name || user.user_metadata.name || user.email?.split('@')[0],
+          role,
+          year: role === "STUDENT" ? year : null,
+          section: role === "STUDENT" ? section : null,
+        }),
+      });
+
+      const syncResult = await syncResponse.json();
+      if (!syncResult.success) {
+        console.error('User sync failed:', syncResult.error);
+        // Continue anyway - we'll handle this gracefully
+      }
+    } catch (syncError) {
+      console.error('User sync error:', syncError);
+      // Continue anyway - we'll handle this gracefully
+    }
+
     // Redirect to dashboard
     router.push("/dashboard");
   };
