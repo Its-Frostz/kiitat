@@ -31,9 +31,11 @@ export default function Home() {
 
   const signInWithGoogle = async () => {
     setError(null);
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
+        redirectTo: `${siteUrl}/dashboard`,
         queryParams: {
           hd: process.env.ALLOWED_EMAIL_DOMAIN || "kiit.ac.in",
         },
