@@ -250,7 +250,7 @@ function TeacherDashboard({ user }: { user: User }) {
           Generate Attendance QR
         </button>
       ) : (
-        <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
+        <div className="bg-grey-800 p-6 rounded-lg shadow-md w-full max-w-md">
           <h3 className="text-lg font-semibold mb-4">Generate QR Code</h3>
           
           <div className="mb-4">
@@ -380,7 +380,7 @@ function TeacherDashboard({ user }: { user: User }) {
       {info && <div className="text-red-600">{info}</div>}
       <div className="mt-8 w-full max-w-xl">
         <h3 className="font-semibold mb-2">Attendance Sessions</h3>
-        <ul className="bg-white rounded shadow divide-y">
+        <ul className="bg-grey-800 rounded shadow divide-y">
           {sessions.length === 0 && <li className="p-2 text-gray-500">No sessions yet.</li>}
           {sessions.map((s, i) => (
             <li key={s.id || i} className="p-2 text-sm flex justify-between items-center">
@@ -556,7 +556,7 @@ function StudentDashboard({ user }: { user: User }) {
       {info && <div className={info.includes('success') ? 'text-green-600' : 'text-red-600'}>{info}</div>}
       <div className="mt-8 w-full max-w-xl">
         <h3 className="font-semibold mb-2">My Attendance</h3>
-        <ul className="bg-white rounded shadow divide-y">
+        <ul className="bg-grey-800 rounded shadow divide-y">
           {history.length === 0 && <li className="p-2 text-gray-500">No attendance yet.</li>}
           {history.map((a, i) => (
             <li key={i} className="p-2 text-sm">
