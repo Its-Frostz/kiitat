@@ -143,7 +143,16 @@ function TeacherDashboard({ user }: { user: User }) {
     setLoading(true);
     setInfo('');
     
-    // Get teacher location
+    // Test with a simple URL first to verify QR generation works
+    const simpleTestUrl = "https://google.com";
+    setQrValue(simpleTestUrl);
+    console.log('Test QR with Google URL:', simpleTestUrl);
+    setInfo('Test QR generated with Google URL');
+    setLoading(false);
+    return;
+    
+    // Get teacher location (commented out for testing)
+    /*
     if (!navigator.geolocation) {
       setInfo('Geolocation not supported');
       setLoading(false);
@@ -170,10 +179,26 @@ function TeacherDashboard({ user }: { user: User }) {
         const result = await response.json();
         
         if (result.success) {
-          // Create a proper attendance URL that can be scanned
-          const attendanceUrl = `${window.location.origin}/attendance?session=${result.sessionId}&data=${encodeURIComponent(JSON.stringify(result.qrPayload))}`;
+          // Production-ready URL generation with proper encoding
+          const baseUrl = window.location.origin;
+          const sessionData = JSON.stringify(result.qrPayload);
+          const encodedData = encodeURIComponent(sessionData);
+          
+          // Create clean, scannable URL
+          const attendanceUrl = `${baseUrl}/attendance?session=${result.sessionId}&data=${encodedData}`;
+          
+          // Set the QR value
           setQrValue(attendanceUrl);
-          setInfo('QR code generated successfully! Valid for 5 minutes.');
+          
+          console.log('Generated QR URL:', attendanceUrl);
+          console.log('URL length:', attendanceUrl.length);
+          
+          // Show appropriate message
+          if (window.location.hostname === 'localhost') {
+            setInfo('QR code generated! Note: localhost URLs only work on the same device. Deploy to test with phones.');
+          } else {
+            setInfo('QR code generated successfully! Valid for 5 minutes.');
+          }
           
           // Refresh sessions list
           fetch(`/api/qr-session?teacherId=${user.id}`)
@@ -193,6 +218,7 @@ function TeacherDashboard({ user }: { user: User }) {
       setInfo('Location permission denied');
       setLoading(false);
     });
+    */
   };
 
   const handleSessionClick = (session: Session) => {
@@ -238,9 +264,26 @@ function TeacherDashboard({ user }: { user: User }) {
         {loading ? 'Generating...' : 'Generate Attendance QR'}
       </button>
       {qrValue && (
-        <div className="mt-4">
-          <QRCodeCanvas value={qrValue} size={200} />
-          <div className="text-xs mt-2">Show this QR to your students</div>
+        <div className="mt-4 flex flex-col items-center">
+          <QRCodeCanvas 
+            value={qrValue} 
+            size={280}
+            level="L"
+            includeMargin={true}
+            marginSize={4}
+            imageSettings={{
+              src: "",
+              x: undefined,
+              y: undefined,
+              height: 0,
+              width: 0,
+              excavate: false,
+            }}
+          />
+          <div className="text-sm mt-3 font-medium">Show this QR to your students</div>
+          <div className="text-xs mt-2 p-2 bg-gray-100 rounded max-w-sm break-all text-center">
+            {qrValue}
+          </div>
         </div>
       )}
       {info && <div className="text-red-600">{info}</div>}
