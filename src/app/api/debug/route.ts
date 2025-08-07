@@ -33,7 +33,9 @@ export async function GET() {
     console.error('Database debug error:', error);
     
     const errorMessage = error instanceof Error ? error.message : 'Unknown database error';
-    const errorCode = error && typeof error === 'object' && 'code' in error ? (error as any).code : undefined;
+    const errorCode = error && typeof error === 'object' && 'code' in error 
+      ? (error as { code: unknown }).code 
+      : undefined;
     
     return NextResponse.json({ 
       success: false, 
