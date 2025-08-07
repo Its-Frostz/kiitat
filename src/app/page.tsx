@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { IconBrandGoogle } from '@tabler/icons-react';
 import { IconMail } from '@tabler/icons-react';
 import ShinyText from "@/components/ShinyText";
-// import LoadingAnimation from "@/components/ui/Loading";
+// import TimelineAnimationComponent from "@/components/ui/Loading";
 import useIsMobile from "@/util";
 
 export default function Home() {
@@ -71,7 +71,7 @@ export default function Home() {
         </div>
 
       </Headertext>
-      {/* <LoadingAnimation /> */}
+      {/* <TimelineAnimationComponent /> */}
     </>
   );
 }
