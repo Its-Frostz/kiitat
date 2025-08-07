@@ -113,17 +113,10 @@ function TeacherDashboard({ user }: { user: User }) {
   const [qrValue, setQrValue] = useState('');
   const [info, setInfo] = useState('');
   const [loading, setLoading] = useState(false);
-  const [history, setHistory] = useState<AttendanceRecord[]>([]);
   const [timetable, setTimetable] = useState<Record<string, unknown> | null>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [students, setStudents] = useState<Student[]>([]);
-
-  useEffect(() => {
-    fetch(`/api/attendance?teacherId=${user.id}`)
-      .then(res => res.json())
-      .then(data => setHistory(data.attendance || []));
-  }, [user.id]);
 
   useEffect(() => {
     if (user.user_metadata.year && user.user_metadata.section) {
@@ -143,16 +136,7 @@ function TeacherDashboard({ user }: { user: User }) {
     setLoading(true);
     setInfo('');
     
-    // Test with a simple URL first to verify QR generation works
-    const simpleTestUrl = "https://google.com";
-    setQrValue(simpleTestUrl);
-    console.log('Test QR with Google URL:', simpleTestUrl);
-    setInfo('Test QR generated with Google URL');
-    setLoading(false);
-    return;
-    
-    // Get teacher location (commented out for testing)
-    /*
+    // Get teacher location
     if (!navigator.geolocation) {
       setInfo('Geolocation not supported');
       setLoading(false);
@@ -218,7 +202,6 @@ function TeacherDashboard({ user }: { user: User }) {
       setInfo('Location permission denied');
       setLoading(false);
     });
-    */
   };
 
   const handleSessionClick = (session: Session) => {

@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Validate QR payload structure
-    const { sessionId, year, section, latitude: qrLat, longitude: qrLng, validFrom, validTo } = qrPayload;
+    const { sessionId, year, section, latitude: qrLat, longitude: qrLng } = qrPayload;
     
     if (!sessionId) {
       return NextResponse.json({ error: 'Invalid QR code: missing session ID' }, { status: 400 });
