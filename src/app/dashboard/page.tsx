@@ -418,7 +418,6 @@ function StudentDashboard({ user }: { user: User }) {
   const [info, setInfo] = useState('');
   const [location, setLocation] = useState<{lat: number, lng: number} | null>(null);
   const [history, setHistory] = useState<AttendanceRecord[]>([]);
-  const [timetable, setTimetable] = useState<Record<string, unknown> | null>(null);
   const [summary, setSummary] = useState<{ total: number, present: number, percentage: number } | null>(null);
 
   useEffect(() => {
@@ -437,14 +436,6 @@ function StudentDashboard({ user }: { user: User }) {
       .then(res => res.json())
       .then(data => setHistory(data.attendance || []));
   }, [user.id]);
-
-  useEffect(() => {
-    if (user.user_metadata.year && user.user_metadata.section) {
-      fetch(`/api/timetable?year=${user.user_metadata.year}&section=${user.user_metadata.section}`)
-        .then(res => res.json())
-        .then(data => setTimetable(data.timetable?.data || null));
-    }
-  }, [user.user_metadata.year, user.user_metadata.section]);
 
   useEffect(() => {
     if (user.user_metadata.year && user.user_metadata.section) {
