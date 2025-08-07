@@ -1,0 +1,6 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="512" height="512" rx="86" fill="#16a34a"/>
+<path d="M256 128L384 256L256 384L128 256L256 128Z" fill="white"/>
+<rect x="213" y="213" width="86" height="86" fill="#16a34a"/>
+<text x="256" y="450" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="42" font-weight="bold">KIITAT</text>
+</svg>

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { IconBrandGoogle } from '@tabler/icons-react';
 import { IconMail } from '@tabler/icons-react';
 import ShinyText from "@/components/ShinyText";
+import InstallPWA from "@/components/InstallPWA";
 // import LoadingAnimation from "@/components/ui/Loading";
 import useIsMobile from "@/util";
 
@@ -71,6 +72,7 @@ export default function Home() {
         </div>
 
       </Headertext>
+      <InstallPWA />
       {/* <LoadingAnimation /> */}
     </>
   );
