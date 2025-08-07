@@ -100,7 +100,7 @@ function AttendanceContent() {
             qrPayload.longitude
           );
 
-          if (distance > 50) {
+          if (distance > 10) {
             setError(`You are too far from the attendance location (${distance.toFixed(0)}m away). Please move closer.`);
             setLoading(false);
             return;
