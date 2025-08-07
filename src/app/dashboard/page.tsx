@@ -113,19 +113,15 @@ function TeacherDashboard({ user }: { user: User }) {
   const [qrValue, setQrValue] = useState('');
   const [info, setInfo] = useState('');
   const [loading, setLoading] = useState(false);
-  const [timetable, setTimetable] = useState<Record<string, unknown> | null>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [students, setStudents] = useState<Student[]>([]);
-
-  useEffect(() => {
-    if (user.user_metadata.year && user.user_metadata.section) {
-      fetch(`/api/timetable?year=${user.user_metadata.year}&section=${user.user_metadata.section}`)
-        .then(res => res.json())
-        .then(data => setTimetable(data.timetable?.data || null));
-    }
-  }, [user.user_metadata.year, user.user_metadata.section]);
-
+  
+  // QR generation form state
+  const [selectedYear, setSelectedYear] = useState<number>(user.user_metadata.year || 1);
+  const [selectedSection, setSelectedSection] = useState<string>(user.user_metadata.section || 'A');
+  const [showQRForm, setShowQRForm] = useState(false);
+  
   useEffect(() => {
     fetch(`/api/qr-session?teacherId=${user.id}`)
       .then(res => res.json())
@@ -153,8 +149,8 @@ function TeacherDashboard({ user }: { user: User }) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             teacherId: user.id,
-            year: user.user_metadata.year,
-            section: user.user_metadata.section,
+            year: selectedYear,
+            section: selectedSection,
             latitude,
             longitude,
           }),
@@ -176,12 +172,14 @@ function TeacherDashboard({ user }: { user: User }) {
           
           console.log('Generated QR URL:', attendanceUrl);
           console.log('URL length:', attendanceUrl.length);
+          console.log('QR generated for Year:', selectedYear, 'Section:', selectedSection);
+          console.log('QR Payload contains:', result.qrPayload);
           
           // Show appropriate message
           if (window.location.hostname === 'localhost') {
-            setInfo('QR code generated! Note: localhost URLs only work on the same device. Deploy to test with phones.');
+            setInfo(`QR code generated for Year ${selectedYear}, Section ${selectedSection}! Note: localhost URLs only work on the same device. Deploy to test with phones.`);
           } else {
-            setInfo('QR code generated successfully! Valid for 5 minutes.');
+            setInfo(`QR code generated for Year ${selectedYear}, Section ${selectedSection}! Valid for 5 minutes.`);
           }
           
           // Refresh sessions list
@@ -243,9 +241,119 @@ function TeacherDashboard({ user }: { user: User }) {
     <div className="flex flex-col items-center gap-4">
       <h2 className="text-xl font-semibold">Teacher Panel</h2>
       <p>Welcome, {user.user_metadata.full_name}</p>
-      <button className="bg-green-600 text-white px-4 py-2 rounded" onClick={generateQR} disabled={loading}>
-        {loading ? 'Generating...' : 'Generate Attendance QR'}
-      </button>
+      
+      {!showQRForm ? (
+        <button 
+          className="bg-green-600 text-white px-4 py-2 rounded" 
+          onClick={() => setShowQRForm(true)}
+        >
+          Generate Attendance QR
+        </button>
+      ) : (
+        <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
+          <h3 className="text-lg font-semibold mb-4">Generate QR Code</h3>
+          
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2">Year</label>
+            <select 
+              value={selectedYear} 
+              onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+              className="w-full p-2 border rounded-md"
+            >
+              <option value={1}>Year 1</option>
+              <option value={2}>Year 2</option>
+              <option value={3}>Year 3</option>
+              <option value={4}>Year 4</option>
+            </select>
+          </div>
+          
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2">Section</label>
+            <select 
+              value={selectedSection} 
+              onChange={(e) => setSelectedSection(e.target.value)}
+              className="w-full p-2 border rounded-md"
+            >
+              <option value="A">Section A</option>
+              <option value="B">Section B</option>
+              <option value="C">Section C</option>
+              <option value="D">Section D</option>
+              <option value="E">Section E</option>
+              <option value="F">Section F</option>
+              <option value="G">Section G</option>
+              <option value="H">Section H</option>
+              <option value="I">Section I</option>
+              <option value="J">Section J</option>
+              <option value="K">Section K</option>
+              <option value="L">Section L</option>
+              <option value="M">Section M</option>
+              <option value="N">Section N</option>
+              <option value="O">Section O</option>
+              <option value="P">Section P</option>
+              <option value="Q">Section Q</option>
+              <option value="R">Section R</option>
+              <option value="S">Section S</option>
+              <option value="T">Section T</option>
+              <option value="U">Section U</option>
+              <option value="V">Section V</option>
+              <option value="W">Section W</option>
+              <option value="X">Section X</option>
+              <option value="Y">Section Y</option>
+              <option value="Z">Section Z</option>
+              <option value="A1">Section A1</option>
+              <option value="A2">Section A2</option>
+              <option value="A3">Section A3</option>
+              <option value="A4">Section A4</option>
+              <option value="A5">Section A5</option>
+              <option value="A6">Section A6</option>
+              <option value="A7">Section A7</option>
+              <option value="A8">Section A8</option>
+              <option value="A9">Section A9</option>
+              <option value="A10">Section A10</option>
+              <option value="A11">Section A11</option>
+              <option value="A12">Section A12</option>
+              <option value="A13">Section A13</option>
+              <option value="A14">Section A14</option>
+              <option value="A15">Section A15</option>
+              <option value="A16">Section A16</option>
+              <option value="A17">Section A17</option>
+              <option value="A18">Section A18</option>
+              <option value="A19">Section A19</option>
+              <option value="A20">Section A20</option>
+              <option value="A21">Section A21</option>
+              <option value="A22">Section A22</option>
+              <option value="A23">Section A23</option>
+              <option value="A24">Section A24</option>
+              <option value="A25">Section A25</option>
+              <option value="A26">Section A26</option>
+              <option value="A27">Section A27</option>
+              <option value="A28">Section A28</option>
+              <option value="A29">Section A29</option>
+              <option value="A30">Section A30</option>
+            </select>
+          </div>
+          
+          <div className="flex gap-2">
+            <button 
+              className="bg-green-600 text-white px-4 py-2 rounded flex-1" 
+              onClick={generateQR} 
+              disabled={loading}
+            >
+              {loading ? 'Generating...' : 'Generate QR'}
+            </button>
+            <button 
+              className="bg-gray-500 text-white px-4 py-2 rounded" 
+              onClick={() => {
+                setShowQRForm(false);
+                setQrValue('');
+                setInfo('');
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
       {qrValue && (
         <div className="mt-4 flex flex-col items-center">
           <QRCodeCanvas 
@@ -299,12 +407,6 @@ function TeacherDashboard({ user }: { user: User }) {
               </li>
             ))}
           </ul>
-        </div>
-      )}
-      {timetable && (
-        <div className="mt-8 w-full max-w-xl">
-          <h3 className="font-semibold mb-2">Timetable</h3>
-          <pre className="bg-gray-100 p-4 rounded text-xs overflow-x-auto text-left">{JSON.stringify(timetable, null, 2)}</pre>
         </div>
       )}
     </div>
@@ -472,12 +574,6 @@ function StudentDashboard({ user }: { user: User }) {
           ))}
         </ul>
       </div>
-      {timetable && (
-        <div className="mt-8 w-full max-w-xl">
-          <h3 className="font-semibold mb-2">Timetable</h3>
-          <pre className="bg-gray-100 p-4 rounded text-xs overflow-x-auto text-left">{JSON.stringify(timetable, null, 2)}</pre>
-        </div>
-      )}
       {summary && (
         <div className="mt-8 w-full max-w-xl">
           <h3 className="font-semibold mb-2">Attendance Summary</h3>

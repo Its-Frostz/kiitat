@@ -61,8 +61,14 @@ function AttendanceContent() {
         }
 
         // Check year/section match
+        console.log('QR Payload:', qrPayload);
+        console.log('User metadata year:', user.user_metadata.year);
+        console.log('User metadata section:', user.user_metadata.section);
+        console.log('QR year:', qrPayload.year);
+        console.log('QR section:', qrPayload.section);
+        
         if (qrPayload.year !== user.user_metadata.year || qrPayload.section !== user.user_metadata.section) {
-          setError('This QR code is not for your year/section');
+          setError(`This QR code is not for your year/section. QR: Year ${qrPayload.year}, Section ${qrPayload.section}. Your profile: Year ${user.user_metadata.year}, Section ${user.user_metadata.section}`);
           setLoading(false);
           return;
         }
