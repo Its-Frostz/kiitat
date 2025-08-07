@@ -62,13 +62,22 @@ function AttendanceContent() {
 
         // Check year/section match
         console.log('QR Payload:', qrPayload);
-        console.log('User metadata year:', user.user_metadata.year);
-        console.log('User metadata section:', user.user_metadata.section);
-        console.log('QR year:', qrPayload.year);
-        console.log('QR section:', qrPayload.section);
+        console.log('User metadata year:', user.user_metadata.year, 'type:', typeof user.user_metadata.year);
+        console.log('User metadata section:', user.user_metadata.section, 'type:', typeof user.user_metadata.section);
+        console.log('QR year:', qrPayload.year, 'type:', typeof qrPayload.year);
+        console.log('QR section:', qrPayload.section, 'type:', typeof qrPayload.section);
         
-        if (qrPayload.year !== user.user_metadata.year || qrPayload.section !== user.user_metadata.section) {
-          setError(`This QR code is not for your year/section. QR: Year ${qrPayload.year}, Section ${qrPayload.section}. Your profile: Year ${user.user_metadata.year}, Section ${user.user_metadata.section}`);
+        // Convert both to numbers for year comparison, and strings for section comparison
+        const userYear = parseInt(user.user_metadata.year);
+        const qrYear = parseInt(qrPayload.year);
+        const userSection = String(user.user_metadata.section);
+        const qrSection = String(qrPayload.section);
+        
+        console.log('Converted comparison - User Year:', userYear, 'QR Year:', qrYear, 'Match:', userYear === qrYear);
+        console.log('Converted comparison - User Section:', userSection, 'QR Section:', qrSection, 'Match:', userSection === qrSection);
+        
+        if (qrYear !== userYear || qrSection !== userSection) {
+          setError(`This QR code is not for your year/section. QR: Year ${qrYear}, Section ${qrSection}. Your profile: Year ${userYear}, Section ${userSection}`);
           setLoading(false);
           return;
         }

@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     // Check if DATABASE_URL is set
     const databaseUrl = process.env.DATABASE_URL;
@@ -29,13 +29,16 @@ export async function GET(req: NextRequest) {
       databaseUrlStart: databaseUrl.substring(0, 20) + '...' // Only show first 20 chars for security
     });
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Database debug error:', error);
+    
+    const errorMessage = error instanceof Error ? error.message : 'Unknown database error';
+    const errorCode = error && typeof error === 'object' && 'code' in error ? (error as any).code : undefined;
     
     return NextResponse.json({ 
       success: false, 
-      error: error.message || 'Unknown database error',
-      code: error.code,
+      error: errorMessage,
+      code: errorCode,
       env: process.env.NODE_ENV,
       databaseUrlExists: !!process.env.DATABASE_URL
     }, { status: 500 });
