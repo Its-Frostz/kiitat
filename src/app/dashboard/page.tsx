@@ -488,7 +488,7 @@ function StudentDashboard({ user }: { user: User }) {
       }
       
       const dist = getDistanceFromLatLonInMeters(location.lat, location.lng, qr.latitude, qr.longitude);
-      if (dist > 10) {
+      if (dist > 50) {
         setInfo(`You are too far from the attendance location (${dist.toFixed(0)}m away). Please move closer.`);
         return;
       }
