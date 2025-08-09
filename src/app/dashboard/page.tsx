@@ -415,6 +415,7 @@ function TeacherDashboard({ user }: { user: User }) {
 
 function StudentDashboard({ user }: { user: User }) {
   const beepRef = useRef<HTMLAudioElement | null>(null);
+  const audioUrlRef = useRef<string | null>(null);
   const [scanResult, setScanResult] = useState('');
   const [info, setInfo] = useState('');
   const [location, setLocation] = useState<{lat: number, lng: number} | null>(null);
@@ -423,18 +424,37 @@ function StudentDashboard({ user }: { user: User }) {
 
   // Prepare audio feedback (place audioqr.mp3 in /public)
   useEffect(() => {
-    beepRef.current = new Audio('/audioqr.mp3');
-    if (beepRef.current) {
-      beepRef.current.preload = 'auto';
-      beepRef.current.volume = 0.7;
-    }
+    let cancelled = false;
+    (async () => {
+      try {
+        // Force bypass cache/PWA by using no-store and a unique query param
+        const res = await fetch(`/audioqr.mp3?v=${Date.now()}`, { cache: 'no-store' });
+        if (!res.ok) throw new Error('Audio not found');
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        audioUrlRef.current = url;
+        const audio = new Audio(url);
+        audio.preload = 'auto';
+        audio.volume = 0.7;
+        if (!cancelled) {
+          beepRef.current = audio;
+        } else {
+          URL.revokeObjectURL(url);
+        }
+      } catch (err) {
+        console.warn('Audio failed to load. Ensure the file exists at public/audioqr.mp3');
+      }
+    })();
     return () => {
+      cancelled = true;
       if (beepRef.current) {
         beepRef.current.pause();
-        // Release reference
-        beepRef.current.src = '';
-        beepRef.current = null;
       }
+      if (audioUrlRef.current) {
+        URL.revokeObjectURL(audioUrlRef.current);
+        audioUrlRef.current = null;
+      }
+      beepRef.current = null;
     };
   }, []);
 
