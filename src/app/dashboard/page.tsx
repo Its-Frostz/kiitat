@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 import { QRCodeCanvas } from 'qrcode.react';
@@ -414,11 +414,29 @@ function TeacherDashboard({ user }: { user: User }) {
 }
 
 function StudentDashboard({ user }: { user: User }) {
+  const beepRef = useRef<HTMLAudioElement | null>(null);
   const [scanResult, setScanResult] = useState('');
   const [info, setInfo] = useState('');
   const [location, setLocation] = useState<{lat: number, lng: number} | null>(null);
   const [history, setHistory] = useState<AttendanceRecord[]>([]);
   const [summary, setSummary] = useState<{ total: number, present: number, percentage: number } | null>(null);
+
+  // Prepare audio feedback (place audioqr.mp3 in /public)
+  useEffect(() => {
+    beepRef.current = new Audio('/audioqr.mp3');
+    if (beepRef.current) {
+      beepRef.current.preload = 'auto';
+      beepRef.current.volume = 0.7;
+    }
+    return () => {
+      if (beepRef.current) {
+        beepRef.current.pause();
+        // Release reference
+        beepRef.current.src = '' as any;
+        beepRef.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -441,7 +459,7 @@ function StudentDashboard({ user }: { user: User }) {
     if (user.user_metadata.year && user.user_metadata.section) {
       fetch(`/api/attendance/summary?userId=${user.id}&year=${user.user_metadata.year}&section=${user.user_metadata.section}`)
         .then(res => res.json())
-        .then(data => setSummary(data.summary || null));
+        .then((data) => setSummary(data.summary || null));
     }
   }, [user.id, user.user_metadata.year, user.user_metadata.section]);
 
@@ -454,10 +472,17 @@ function StudentDashboard({ user }: { user: User }) {
     try {
       // Check if it's a URL (new format)
       if (data.startsWith('http')) {
-        // Redirect to attendance page
-        window.location.href = data;
-        return;
-      }
+        // Provide immediate feedback
+        try {
+          if (beepRef.current) {
+            beepRef.current.currentTime = 0;
+            await beepRef.current.play();
+          }
+        } catch {}
+         // Redirect to attendance page
+         window.location.href = data;
+         return;
+       }
 
       // Handle legacy JSON format
       const qr = JSON.parse(data);
@@ -510,13 +535,20 @@ function StudentDashboard({ user }: { user: User }) {
       
       if (result.success) {
         setInfo('✅ Attendance marked successfully!');
-        // Refresh attendance history
-        fetch(`/api/attendance?userId=${user.id}`)
-          .then(res => res.json())
-          .then(data => setHistory(data.attendance || []));
-      } else {
-        setInfo(`❌ ${result.error || 'Attendance failed.'}`);
-      }
+        // Play confirmation sound
+        try {
+          if (beepRef.current) {
+            beepRef.current.currentTime = 0;
+            await beepRef.current.play();
+          }
+        } catch {}
+         // Refresh attendance history
+         fetch(`/api/attendance?userId=${user.id}`)
+           .then(res => res.json())
+           .then(data => setHistory(data.attendance || []));
+       } else {
+         setInfo(`❌ ${result.error || 'Attendance failed.'}`);
+       }
     } catch (error) {
       console.error('QR scan error:', error);
       setInfo('Invalid QR code format.');
