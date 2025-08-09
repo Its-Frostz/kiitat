@@ -432,7 +432,7 @@ function StudentDashboard({ user }: { user: User }) {
       if (beepRef.current) {
         beepRef.current.pause();
         // Release reference
-        beepRef.current.src = '' as any;
+        beepRef.current.src = '';
         beepRef.current = null;
       }
     };
